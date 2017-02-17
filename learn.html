@@ -26,7 +26,7 @@
     </style>
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
     <script type="text/javascript">
-    var stage, messageField, preload, canvas, floorImage, manifest, background, width, height;
+    var stage, messageField, preload, canvas, floorImage, manifest, background, width, height, imStupidBird;
     var ground;
     var stageName = 'bg';
 
@@ -41,7 +41,7 @@
         // grab canvas width and height for later calculations:
         width = stage.canvas.width;
         height = stage.canvas.height;
-        //ready
+        //images
         manifest = [
             {src:"img/bird.png", id:"bird"},
             {src:"img/background.png", id:"background"},
@@ -84,17 +84,68 @@
         //fill in img background drawRect(x, y, w, h)
         background.graphics.beginBitmapFill(preload.getResult('background')).drawRect(0,0,width,height);
 
+        stage.addChild(background);
+
         //groud create
         var groundImg = preload.getResult('ground');
         ground = new createjs.Shape();
         ground.graphics.beginBitmapFill(groundImg).drawRect(0, 0, width, groundImg.height);
         ground.y = height - groundImg.height;
 
-        stage.addChild(background);
-        stage.addChild(ground);
-        stage.update();
+        //groud2 create
+        ground2 = new createjs.Shape();
+        ground2.graphics.beginBitmapFill(groundImg).drawRect(0, 0, width, groundImg.height);
+        ground2.y = height - groundImg.height;
+        ground2.x = ground.x + width;
+        stage.addChild(ground, ground2);
+
+        //stupid bird (SpriteSheet = play image)
+        var stupidBird = new createjs.SpriteSheet({
+            'images': [preload.getResult('bird')],
+            //set center and size of frames, center is important for later bird roation
+            "frames": {"width": 92, "height": 64, "regX": 46, "regY": 32, "count": 3},
+            // define two animations, run (loops, 0.21x speed) and dive (returns to dive and holds frame one static):
+            "animations": {"fly": [0, 2, "fly", 0.21], "dive": [1, 1, "dive", 1]}
+        });
+
+        //bird is created (Sprite = show SpriteSheet)
+        imStupidBird = new createjs.Sprite(stupidBird, "fly");
+
+        var startX = width / 2 - 100;
+        var startY = 512;
+
+        imStupidBird.setTransform(startX, startY, 1, 1);
+        // Set framerate
+        imStupidBird.framerate = 30;
+
+        // Use a tween to wiggle the bird up and down using a sineInOut Ease
+        createjs.Tween.get(imStupidBird, {loop:true})
+            .to( {y:startY + 100}, 380, createjs.Ease.sineInOut)
+            .to( {y:startY}, 380, createjs.Ease.sineInOut);
+        stage.addChild(imStupidBird);
+        //jump
+        stage.addEventListener("stagemousedown", handleJumpStart);
+
+        //tick
+        createjs.Ticker.addEventListener("tick", tick);
     }
 
+    function handleJumpStart()
+    {
+
+    }
+
+    function tick(event)
+    {
+        if (ground2.x <= 0) {
+            ground.x = 0;
+            ground2.x = ground.x + width;
+        } else {
+            ground.x = ground.x - 10;
+            ground2.x = ground2.x - 10;
+        }
+        stage.update();
+    }
 
     function settingMessageField()
     {
