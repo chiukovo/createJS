@@ -29,6 +29,11 @@
     var stage, messageField, preload, canvas, floorImage, manifest, background, width, height, imStupidBird;
     var ground;
     var stageName = 'bg';
+    var dead = false;
+    var startJump = false;
+    var keepJump = false;
+
+    document.onkeydown = handleKeyDown;
 
     function init()
     {
@@ -97,7 +102,6 @@
         ground2.graphics.beginBitmapFill(groundImg).drawRect(0, 0, width, groundImg.height);
         ground2.y = height - groundImg.height;
         ground2.x = ground.x + width;
-        stage.addChild(ground, ground2);
 
         //stupid bird (SpriteSheet = play image)
         var stupidBird = new createjs.SpriteSheet({
@@ -122,17 +126,35 @@
         createjs.Tween.get(imStupidBird, {loop:true})
             .to( {y:startY + 100}, 380, createjs.Ease.sineInOut)
             .to( {y:startY}, 380, createjs.Ease.sineInOut);
-        stage.addChild(imStupidBird);
+        stage.addChild(imStupidBird, ground, ground2);
         //jump
         stage.addEventListener("stagemousedown", handleJumpStart);
+        //keepJump
+        stage.addEventListener("stagemousedown", handleKeepJump);
 
         //tick
         createjs.Ticker.addEventListener("tick", tick);
     }
 
-    function handleJumpStart()
+    function handleKeyDown(e)
     {
+        switch(e.keyCode) {
+            case KEYCODE_SPACE: handleJumpStart();
+        }
+    }
 
+    function handleKeepJump(e)
+    {
+        keepJump = true;
+    }
+
+    function handleJumpStart(e)
+    {
+        if ( ! dead) {
+            createjs.Tween.removeTweens(imStupidBird);
+            imStupidBird.gotoAndPlay('jump');
+            startJump = true;
+        }
     }
 
     function tick(event)
@@ -144,6 +166,25 @@
             ground.x = ground.x - 10;
             ground2.x = ground2.x - 10;
         }
+
+
+        //start
+        if ( ! dead) {
+            if (startJump) {
+                createjs.Tween.removeTweens(imStupidBird);
+
+                if (keepJump) {
+                    document.onkeydown = function () {
+                        console.log('in');
+                    }
+                } else {
+                    imStupidBird.y = imStupidBird.y + 15;
+                }
+
+                keepJump = false;
+            }
+        }
+
         stage.update();
     }
 
