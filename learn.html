@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>bird</title>
+    <style type="text/css">
+        @font-face {
+            font-family: 'Flappy Bird';
+            src: url('fonts/FB.eot');
+            src: url('fonts/FB.eot?#iefix') format('embedded-opentype'),
+                 url('fonts/FB.woff') format('woff'),
+                 url('fonts/FB.ttf') format('truetype'),
+                 url('fonts/FB.svg#04b_19regular') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+        body, html {
+            margin: 0px;
+            padding: 0px;
+            text-align: center;
+            height: 100%;
+        }
+        canvas {
+            margin-bottom: -4px;
+            height: 100%;
+        }
+    </style>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script type="text/javascript">
+    var stage, messageField, preload, canvas, floorImage, manifest, background, width, height;
+    var ground;
+    var stageName = 'bg';
+
+    function init()
+    {
+        //canvas
+        canvas = document.getElementById(stageName);
+        //create stage
+        stage = new createjs.Stage(stageName);
+        //setting message
+        settingMessageField();
+        // grab canvas width and height for later calculations:
+        width = stage.canvas.width;
+        height = stage.canvas.height;
+        //ready
+        manifest = [
+            {src:"img/bird.png", id:"bird"},
+            {src:"img/background.png", id:"background"},
+            {src:"img/ground.png", id:"ground"},
+            {src:"img/pipe.png", id:"pipe"},
+            {src:"img/restart.png", id:"start"},
+            {src:"img/share.png", id:"share"}
+        ];
+
+        preload = new createjs.LoadQueue();
+        //events
+        preload.addEventListener("progress", updateLoading);
+        preload.addEventListener("complete", doneLoading);
+        //setting Add files you want to load
+        preload.loadManifest(manifest);
+    }
+
+    function updateLoading()
+    {
+        //preload.progress = 0~100%
+        messageField.text = "Loading " + (preload.progress * 100) + "%";
+        stage.update();
+    }
+
+    function doneLoading()
+    {
+        //clearInterval(loadingInterval);
+        messageField.text = "Click to start";
+        stage.update();
+
+        canvas.onclick = handleStart;
+    }
+
+    function handleStart()
+    {
+        //remove text
+        stage.removeAllChildren();
+
+        background = new createjs.Shape();
+        //fill in img background drawRect(x, y, w, h)
+        background.graphics.beginBitmapFill(preload.getResult('background')).drawRect(0,0,width,height);
+
+        //groud create
+        var groundImg = preload.getResult('ground');
+        ground = new createjs.Shape();
+        ground.graphics.beginBitmapFill(groundImg).drawRect(0, 0, width, groundImg.height);
+        ground.y = height - groundImg.height;
+
+        stage.addChild(background);
+        stage.addChild(ground);
+        stage.update();
+    }
+
+
+    function settingMessageField()
+    {
+        messageField = new createjs.Text("Loading", "bold 24px", "#333");
+        messageField.maxWidth = 1000;
+        messageField.textAlign = 'center';
+        messageField.x = canvas.width / 2;
+        messageField.y = canvas.height / 2;
+        stage.addChild(messageField);
+        stage.update();
+    }
+    </script>
+</head>
+<body onload="init();">
+    <canvas id="bg" width="768" height="1024"></canvas>
+</body>
+</html>

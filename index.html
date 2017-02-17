@@ -9,7 +9,7 @@
         <title>Flappy Bird</title>
         <meta name="viewport" content="width=768">
         <script src="http://www.createjs.com/Demos/EaselJS/assets/preloadjs-NEXT.min.js"></script>
-        <script src="http://code.createjs.com/createjs-2013.09.25.min.js"></script>
+        <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
         <script src="ndgmr.Collision.js"></script>
         <!-- http://www.dafont.com/04b-19.font?text=Flappy+Bird -->
 
@@ -43,7 +43,7 @@
             // view-source:http://createjs.com/Demos/EaselJS/Game.html COPY THIS
             var stage, w, h, loader, pipe1height, pipe2height, pipe3height, startX, startY, wiggleDelta;
             var background, bird, ground, pipe, bottomPipe, pipes, rotationDelta, counter, counterOutline;
-            var started = false; 
+            var started = false;
             var startJump = false; // Has the jump started?
 
             var jumpAmount = 120; // How high is the jump?
@@ -72,18 +72,18 @@
                 createjs.Touch.enable(stage);
                 // stage.canvas.width = document.body.clientWidth; //document.width is obsolete
                 // stage.canvas.height = document.body.clientHeight; //document.height is obsolete
-                
+
                 // grab canvas width and height for later calculations:
                 w = stage.canvas.width;
                 h = stage.canvas.height;
 
                 manifest = [
-                    {src:"img/bird.png", id:"bird"},
-                    {src:"img/background.png", id:"background"},
-                    {src:"img/ground.png", id:"ground"},
-                    {src:"img/pipe.png", id:"pipe"},
-                    {src:"img/restart.png", id:"start"},
-                    {src:"img/share.png", id:"share"}
+                    { src:"img/bird.png", id:"bird" },
+                    { src:"img/background.png", id:"background" },
+                    { src:"img/ground.png", id:"ground" },
+                    { src:"img/pipe.png", id:"pipe" },
+                    { src:"img/restart.png", id:"start" },
+                    { src:"img/share.png", id:"share" }
                 ];
 
                 loader = new createjs.LoadQueue(false);
@@ -92,21 +92,21 @@
             }
 
             function handleComplete() {
-                
+
                 background = new createjs.Shape();
                 background.graphics.beginBitmapFill(loader.getResult("background")).drawRect(0,0,w,h);
-                
+
                 var groundImg = loader.getResult("ground");
                 ground = new createjs.Shape();
                 ground.graphics.beginBitmapFill(groundImg).drawRect(0, 0, w+groundImg.width, groundImg.height);
                 ground.tileW = groundImg.width;
                 ground.y = h-groundImg.height;
-                
-            
+
+
                 var data = new createjs.SpriteSheet({
                     "images": [loader.getResult("bird")],
                     //set center and size of frames, center is important for later bird roation
-                    "frames": {"width": 92, "height": 64, "regX": 46, "regY": 32, "count": 3}, 
+                    "frames": {"width": 92, "height": 64, "regX": 46, "regY": 32, "count": 3},
                     // define two animations, run (loops, 0.21x speed) and dive (returns to dive and holds frame one static):
                     "animations": {"fly": [0, 2, "fly", 0.21], "dive": [1, 1, "dive", 1]}
                 });
@@ -127,12 +127,12 @@
 
                 stage.addChild(background);
 
-                pipes = new createjs.Container(); 
+                pipes = new createjs.Container();
                 stage.addChild(pipes)
 
                 stage.addChild(bird, ground);
                 stage.addEventListener("stagemousedown", handleJumpStart);
-                
+
                 counter = new createjs.Text(0, "86px 'Flappy Bird'", "#ffffff");
                 counterOutline = new createjs.Text(0, "86px 'Flappy Bird'", "#000000");
                 counterOutline.outline = 5
@@ -167,7 +167,7 @@
                     startJump = true
                     if (!started) {
                         started = true
-                        counterShow = true                        
+                        counterShow = true
                     }
                 }
             }
@@ -217,7 +217,7 @@
                 stage.addChild(share)
                 createjs.Tween.get(start).to({alpha:1, y: start.y + 50}, 400, createjs.Ease.sineIn).call(addClickToStart)
                 createjs.Tween.get(share).to({alpha:1, y: share.y + 50}, 400, createjs.Ease.sineIn).call(addClickToStart)
-                
+
             }
             function removeStart() {
                 stage.removeChild(start)
@@ -251,11 +251,11 @@
                         createjs.Tween.removeTweens ( bird )
                     }
                 }
-                
+
                 if (!dead) {
                     ground.x = (ground.x-deltaS*300) % ground.tileW;
                 }
-            
+
 
                 if (started && !dead) {
                     if (pipeDelay == 0) {
@@ -283,7 +283,7 @@
                     for(var i = 0; i < l; i++) {
                         pipe = pipes.getChildAt(i);
                         if (pipe) {
-                            if (true) { // tried replacing true with this, but it's off: pipe.x < bird.x + 92 && pipe.x > bird.x 
+                            if (true) { // tried replacing true with this, but it's off: pipe.x < bird.x + 92 && pipe.x > bird.x
                                 var collision = ndgmr.checkRectCollision(pipe,bird,1,true)
                                 if (collision) {
                                     if (collision.width > 8 && collision.height > 8) {
@@ -297,7 +297,7 @@
                                 counter.text = counter.text + 1
                                 counterOutline.text = counterOutline.text + 1
                             }
-                            if (pipe.x + pipe.image.width <= -pipe.w) { 
+                            if (pipe.x + pipe.image.width <= -pipe.w) {
                                 pipes.removeChild(pipe)
                             }
                         }
@@ -335,22 +335,13 @@
                         .to({y:ground.y - 30}, (h - (bird.y+200))/1.5, createjs.Ease.linear); //drop to the bedrock
                 }
 
-                
+
                 stage.update(event);
             }
-            
+
         </script>
     </head>
     <body onload="init();">
         <canvas id="testCanvas" width="768" height="1024"></canvas>
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-          ga('create', 'UA-38232777-1', 'maxmcd.com');
-          ga('send', 'pageview');
-        </script>
     </body>
 </html>
