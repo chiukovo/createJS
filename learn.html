@@ -26,13 +26,18 @@
     </style>
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
     <script type="text/javascript">
-    var stage, messageField, preload, canvas, floorImage, manifest, background, width, height, imStupidBird;
+    var stage, messageField, preload, canvas, floorImage, manifest, background, width, height, imStupidBird, topPipe, bottomPipe;
     var ground;
     var stageName = 'bg';
     var dead = false;
     var startJump = false;
     var keepJump = false;
     var jumpTime = 266;
+    var pipeDelay = 50;
+    var groundImg, pipes;
+    var needCreate = true;
+    var isCreateOne = false;
+    var KEYCODE_SPACE = 32;
 
     document.onkeydown = handleKeyDown;
 
@@ -53,7 +58,8 @@
             {src:"img/background.png", id:"background"},
             {src:"img/ground.png", id:"ground"},
             {src:"img/pipe.png", id:"pipe"},
-            {src:"img/restart.png", id:"start"},
+            {src:"img/restart.png", id:"restart"},
+            {src:"img/start.png", id:"start"},
             {src:"img/share.png", id:"share"}
         ];
 
@@ -74,11 +80,16 @@
 
     function doneLoading()
     {
-        //clearInterval(loadingInterval);
-        messageField.text = "Click to start";
+        stage.removeChild(messageField);
+        //load img
+        var start = new createjs.Bitmap(preload.getResult("start"));
+        start.x = width / 2 - (start.image.width) / 2;
+        start.y = height / 2 - (start.image.height) / 2;
+
+        stage.addChild(start);
         stage.update();
 
-        handleStart();
+        start.addEventListener("click", handleStart);
     }
 
     function handleStart()
@@ -86,15 +97,18 @@
         console.log('handleStart');
         //remove text
         stage.removeAllChildren();
-
+        //Layer 1
         background = new createjs.Shape();
         //fill in img background drawRect(x, y, w, h)
         background.graphics.beginBitmapFill(preload.getResult('background')).drawRect(0,0,width,height);
 
         stage.addChild(background);
 
-        //groud create
-        var groundImg = preload.getResult('ground');
+        //Layer 2
+        pipes = new createjs.Container();
+        stage.addChild(pipes)
+        //groud create Layer 3
+        groundImg = preload.getResult('ground');
         ground = new createjs.Shape();
         ground.graphics.beginBitmapFill(groundImg).drawRect(0, 0, width, groundImg.height);
         ground.y = height - groundImg.height;
@@ -165,8 +179,26 @@
         imStupidBird.gotoAndPlay("dive");
     }
 
+    function createPipes()
+    {
+        //create one
+        //top pipe
+        topPipe = new createjs.Bitmap(preload.getResult('pipe'));
+        topPipe.x = width + 100;
+        topPipe.y = (ground.y - 250*2) * Math.random() + 250*1.5;
+
+        //bottom pipe
+        bottomPipe = new createjs.Bitmap(preload.getResult('pipe'));
+        bottomPipe.x = width + 236;
+        bottomPipe.rotation = 180;
+        bottomPipe.y = topPipe.y - 230;
+        pipes.addChild(topPipe, bottomPipe);
+    }
+
     function tick(event)
     {
+        var count = pipes.getNumChildren();
+
         if (ground2.x <= 0) {
             ground.x = 0;
             ground2.x = ground.x + width;
@@ -178,9 +210,40 @@
         if ( ! dead) {
             if (startJump) {
 
+                if (pipeDelay == 0 && ! isCreateOne) {
+                    //is create one
+                    createPipes();
+                    isCreateOne = true;
+                } else {
+                    pipeDelay = pipeDelay - 1;
+                }
+
+                if (isCreateOne) {
+                    //1 group = 2(top and bottom)
+                    for(var i = 0; i < count; i += 2) {
+                        pipe = pipes.getChildAt(i);
+                        pipeNext = pipes.getChildAt(i+1);
+
+                        if (pipe) {
+                            if (pipe.x <= -150) {
+                                pipes.removeChild(pipe);
+                                pipes.removeChild(pipeNext);
+                            }
+
+                            pipe.x = pipe.x - 10;
+                            pipeNext.x = pipeNext.x - 10;
+
+                            if (pipe.x <= 300 && ! pipe.isCreate) {
+                                pipe.isCreate = true;
+                                createPipes();
+                            }
+                        }
+                    }
+                }
+
+
                 if (keepJump) {
-                    createjs.Tween.removeTweens ( imStupidBird )
-                    imStupidBird.gotoAndPlay("fly");
+                    createjs.Tween.removeTweens ( imStupidBird );
 
                     if (imStupidBird.y < -200) {
                         imStupidBird.y = -200;
