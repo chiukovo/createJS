@@ -25,6 +25,7 @@
         }
     </style>
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script src="ndgmr.Collision.js?v1"></script>
     <script type="text/javascript">
     var stage, messageField, preload, canvas, floorImage, manifest, background, width, height, imStupidBird, topPipe, bottomPipe;
     var ground;
@@ -32,7 +33,7 @@
     var dead = false;
     var startJump = false;
     var keepJump = false;
-    var jumpTime = 266;
+    var jumpTime = 330;
     var pipeDelay = 50;
     var groundImg, pipes;
     var needCreate = true;
@@ -186,13 +187,13 @@
         topPipe = new createjs.Bitmap(preload.getResult('pipe'));
         topPipe.x = width + 100;
         topPipe.y = (ground.y - 250*2) * Math.random() + 250*1.5;
-
+        pipes.addChild(topPipe);
         //bottom pipe
         bottomPipe = new createjs.Bitmap(preload.getResult('pipe'));
         bottomPipe.x = width + 236;
         bottomPipe.rotation = 180;
         bottomPipe.y = topPipe.y - 230;
-        pipes.addChild(topPipe, bottomPipe);
+        pipes.addChild(bottomPipe);
     }
 
     function tick(event)
@@ -225,6 +226,14 @@
                         pipeNext = pipes.getChildAt(i+1);
 
                         if (pipe) {
+
+                            var collision = ndgmr.checkRectCollision(pipe, imStupidBird);
+
+                            if (collision) {
+                                if (collision.width > 8 && collision.height > 8) {
+                                    console.log('die');
+                                }
+                            }
                             if (pipe.x <= -150) {
                                 pipes.removeChild(pipe);
                                 pipes.removeChild(pipeNext);
