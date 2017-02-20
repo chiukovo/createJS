@@ -32,6 +32,7 @@
     var dead = false;
     var startJump = false;
     var keepJump = false;
+    var jumpTime = 266;
 
     document.onkeydown = handleKeyDown;
 
@@ -77,11 +78,12 @@
         messageField.text = "Click to start";
         stage.update();
 
-        canvas.onclick = handleStart;
+        handleStart();
     }
 
     function handleStart()
     {
+        console.log('handleStart');
         //remove text
         stage.removeAllChildren();
 
@@ -102,6 +104,8 @@
         ground2.graphics.beginBitmapFill(groundImg).drawRect(0, 0, width, groundImg.height);
         ground2.y = height - groundImg.height;
         ground2.x = ground.x + width;
+
+        stage.addChild(ground, ground2);
 
         //stupid bird (SpriteSheet = play image)
         var stupidBird = new createjs.SpriteSheet({
@@ -126,7 +130,8 @@
         createjs.Tween.get(imStupidBird, {loop:true})
             .to( {y:startY + 100}, 380, createjs.Ease.sineInOut)
             .to( {y:startY}, 380, createjs.Ease.sineInOut);
-        stage.addChild(imStupidBird, ground, ground2);
+
+        stage.addChild(imStupidBird);
         //jump
         stage.addEventListener("stagemousedown", handleJumpStart);
         //keepJump
@@ -151,10 +156,13 @@
     function handleJumpStart(e)
     {
         if ( ! dead) {
-            createjs.Tween.removeTweens(imStupidBird);
             imStupidBird.gotoAndPlay('jump');
             startJump = true;
         }
+    }
+
+    function diveBird() {
+        imStupidBird.gotoAndPlay("dive");
     }
 
     function tick(event)
@@ -166,25 +174,36 @@
             ground.x = ground.x - 10;
             ground2.x = ground2.x - 10;
         }
-
-
         //start
         if ( ! dead) {
             if (startJump) {
-                createjs.Tween.removeTweens(imStupidBird);
 
                 if (keepJump) {
-                    document.onkeydown = function () {
-                        console.log('in');
+                    createjs.Tween.removeTweens ( imStupidBird )
+                    imStupidBird.gotoAndPlay("fly");
+
+                    if (imStupidBird.y < -200) {
+                        imStupidBird.y = -200;
                     }
-                } else {
-                    imStupidBird.y = imStupidBird.y + 15;
+
+                    createjs
+                        .Tween
+                        .get(imStupidBird)
+                        //rotate to jump position and jump imStupidBird
+                        .to({y:imStupidBird.y - 120, rotation: -20}, jumpTime, createjs.Ease.quadOut)
+                        //reverse jump for smooth arch
+                        .to({y:imStupidBird.y}, jumpTime, createjs.Ease.quadIn)
+                        //rotate back
+                        .to({y:imStupidBird.y + 200, rotation: 90}, 200, createjs.Ease.linear)
+                        // change imStupidBird to diving position
+                        .call(diveBird)
+                        //drop to the bedrock
+                        .to({y:ground.y - 30}, (height - (imStupidBird.y+200))/1.5, createjs.Ease.linear);
                 }
 
                 keepJump = false;
             }
         }
-
         stage.update();
     }
 
